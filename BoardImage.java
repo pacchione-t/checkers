@@ -1,5 +1,3 @@
-package checkers;
-
 import javalib.worldimages.*;
 import java.awt.Color;
 
