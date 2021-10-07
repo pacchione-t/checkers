@@ -1,5 +1,3 @@
-package checkers;
-
 import java.util.ArrayList;
 
 // Represents the state of the board for a game of checkers
