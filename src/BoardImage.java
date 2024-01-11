@@ -22,7 +22,7 @@ public class BoardImage {
     private WorldImage checkerboard;
 
     // The relative size of the output image
-    public static final int SIZE = 72;
+    public static final int SIZE = 60;
 
     private Color DARK_GREEN = Color.GREEN.darker().darker();
 
