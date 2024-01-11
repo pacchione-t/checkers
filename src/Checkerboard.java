@@ -1,14 +1,14 @@
 package src;
 
 // Represents the state of the board for a game of checkers
-// The model in the MVC design pattern
+// The "model" in the MVC design pattern
 public class Checkerboard {
     // The states of the individual squares on the board
-     public static final int EMPTY = 0;
-     public static final int WHITE_PIECE = 1;
-     public static final int BLACK_PIECE = 2;
-     public static final int WHITE_KING = 3;
-     public static final int BLACK_KING = 4;
+    public static final int EMPTY = 0;
+    public static final int WHITE_PIECE = 1;
+    public static final int BLACK_PIECE = 2;
+    public static final int WHITE_KING = 3;
+    public static final int BLACK_KING = 4;
 
     // The states of the individual squares on the board
     private int[] states;
@@ -63,15 +63,16 @@ public class Checkerboard {
         int fromState = getState(fromSquare);
         int toState = getState(toSquare);
 
-        if (toState == EMPTY && ((fromSquare < toSquare && fromState != WHITE_PIECE)
-                || (fromSquare > toSquare && fromState != BLACK_PIECE))
+        if (fromState != EMPTY && toState == EMPTY
+                && ((fromSquare < toSquare && fromState != WHITE_PIECE)
+                        || (fromSquare > toSquare && fromState != BLACK_PIECE))
                 && ((Math.abs(fromSquare - toSquare) == 4)
                         || ((fromSquare / 4 % 2 == 0 && fromSquare % 8 != 3 && fromSquare % 8 != 4)
                                 && (toSquare == fromSquare - 3 || toSquare == fromSquare + 5))
                         || ((fromSquare / 4 % 2 == 1 && fromSquare % 8 != 3 && fromSquare % 8 != 4)
                                 && (toSquare == fromSquare - 5 || toSquare == fromSquare + 3)))) {
             setState(toSquare, getState(fromSquare));
-            setState(fromSquare, 0);
+            setState(fromSquare, EMPTY);
 
             king(toSquare);
 
@@ -83,24 +84,22 @@ public class Checkerboard {
 
     // Completes a jump if it is legal; returns true if successful
     public boolean jump(int fromSquare, int toSquare) {
-        int mid = fromSquare / 4 % 2 == 1 ? Math.abs(fromSquare + toSquare) / 2
+        int midSquare = fromSquare / 4 % 2 == 1 ? Math.abs(fromSquare + toSquare) / 2
                 : Math.abs(fromSquare + toSquare) / 2 + 1;
 
         int fromState = getState(fromSquare);
-        int midState = getState(mid);
+        int midState = getState(midSquare);
         int toState = getState(toSquare);
 
-        if (toState == EMPTY
-                && ((fromSquare < toSquare && fromState != 1) || (fromSquare > toSquare && fromState != 2))
+        if (fromState != EMPTY && midState != EMPTY && toState == EMPTY
+                && fromState % 2 != midState % 2
+                && ((fromSquare < toSquare && fromState != WHITE_PIECE)
+                        || (fromSquare > toSquare && fromState != BLACK_PIECE))
                 && (((toSquare == fromSquare + 9 || toSquare == fromSquare - 7) && fromSquare % 4 != 3)
-                        || ((toSquare == fromSquare + 7 || toSquare == fromSquare - 9) && fromSquare % 4 != 0))
-                && (((fromState == BLACK_PIECE || fromState == BLACK_KING)
-                        && (midState == WHITE_PIECE || midState == WHITE_KING))
-                        || ((fromState == WHITE_PIECE || fromState == WHITE_KING)
-                                && (midState == BLACK_PIECE || midState == BLACK_KING)))) {
+                        || ((toSquare == fromSquare + 7 || toSquare == fromSquare - 9) && fromSquare % 4 != 0))) {
             setState(toSquare, getState(fromSquare));
-            setState(fromSquare, 0);
-            setState(mid, 0);
+            setState(fromSquare, EMPTY);
+            setState(midSquare, EMPTY);
 
             if (midState % 2 == 1) {
                 whitePieces--;
@@ -118,8 +117,8 @@ public class Checkerboard {
 
     // "Kings" the checkers piece at the given square on the board
     private void king(int square) {
-        if ((getState(square) == BLACK_PIECE && square / 4 == 7)
-                || (getState(square) == WHITE_PIECE && square / 4 == 0)) {
+        if ((getState(square) == WHITE_PIECE && square / 4 == 0)
+                || (getState(square) == BLACK_PIECE && square / 4 == 7)) {
             setState(square, getState(square) + 2);
         }
     }
@@ -181,11 +180,7 @@ public class Checkerboard {
             midState = getState((square + 5) - (square / 4 % 2));
             endState = getState(square + 9);
 
-            if ((((state == BLACK_PIECE || state == BLACK_KING)
-                    && (midState == WHITE_PIECE || midState == WHITE_KING))
-                    || (state == WHITE_KING
-                            && (midState == BLACK_PIECE || midState == BLACK_KING)))
-                    && endState == EMPTY) {
+            if (state != WHITE_PIECE && midState != EMPTY && endState == EMPTY && state % 2 != midState % 2) {
                 return true;
             }
         }
@@ -193,11 +188,7 @@ public class Checkerboard {
             midState = getState((square + 4) - (square / 4 % 2));
             endState = getState(square + 7);
 
-            if ((((state == BLACK_PIECE || state == BLACK_KING)
-                    && (midState == WHITE_PIECE || midState == WHITE_KING))
-                    || (state == WHITE_KING
-                            && (midState == BLACK_PIECE || midState == BLACK_KING)))
-                    && endState == EMPTY) {
+            if (state != WHITE_PIECE && midState != EMPTY && endState == EMPTY && state % 2 != midState % 2) {
                 return true;
             }
         }
@@ -205,11 +196,7 @@ public class Checkerboard {
             midState = getState((square - 3) - (square / 4 % 2));
             endState = getState(square - 7);
 
-            if ((((state == WHITE_PIECE || state == WHITE_KING)
-                    && (midState == BLACK_PIECE || midState == BLACK_KING))
-                    || (state == BLACK_KING
-                            && (midState == WHITE_PIECE || midState == WHITE_KING)))
-                    && endState == EMPTY) {
+            if (state != BLACK_PIECE && midState != EMPTY && endState == EMPTY && state % 2 != midState % 2) {
                 return true;
             }
         }
@@ -217,11 +204,7 @@ public class Checkerboard {
             midState = getState((square - 4) - (square / 4 % 2));
             endState = getState(square - 9);
 
-            if ((((state == WHITE_PIECE || state == WHITE_KING)
-                    && (midState == BLACK_PIECE || midState == BLACK_KING))
-                    || (state == BLACK_KING
-                            && (midState == WHITE_PIECE || midState == WHITE_KING)))
-                    && endState == EMPTY) {
+            if (state != BLACK_PIECE && midState != EMPTY && endState == EMPTY && state % 2 != midState % 2) {
                 return true;
             }
         }
@@ -229,21 +212,14 @@ public class Checkerboard {
         return false;
     }
 
-    // Determines whether white has any legal moves (including jumps)
-    public boolean whiteHasMove() {
-        for (int i = 0; i < 32; i++) {
-            if ((getState(i) == WHITE_PIECE || getState(i) == WHITE_KING) && hasMove(i)) {
-                return true;
-            }
-        }
+    // Determines whether white or black has any legal moves (including jumps)
+    public boolean hasMove(boolean color) {
+        int state;
 
-        return false;
-    }
-
-    // Determines whether black has any legal moves (including jumps)
-    public boolean blackHasMove() {
         for (int i = 0; i < 32; i++) {
-            if ((getState(i) == BLACK_PIECE || getState(i) == BLACK_KING) && hasMove(i)) {
+            state = getState(i);
+
+            if (state != EMPTY && color == (state % 2 == 1) && hasMove(i)) {
                 return true;
             }
         }

@@ -16,7 +16,7 @@ public class Checkers {
 }
 
 // Represents the entire state of a game of checkers
-// The controller in the MVC design pattern
+// The "controller" in the MVC design pattern
 class CheckersWorld extends World {
     // The game board
     private Checkerboard board;
@@ -24,7 +24,7 @@ class CheckersWorld extends World {
     private BoardImage image;
 
     // Fields that keep track of user input and the state of the game
-    private boolean turn; // false = black's turn
+    private boolean turn; // true corresponds to white (and vice versa)
     private int selected;
     private boolean jumped;
     private boolean resigned;
@@ -69,8 +69,7 @@ class CheckersWorld extends World {
         if (selSquare != -1 && !gameOver()) {
             int selState = board.getState(selSquare);
 
-            if (selState != Checkerboard.EMPTY && ((turn && selState % 2 == 1) || (!turn && selState % 2 == 0))
-                    && board.hasMove(selSquare)) {
+            if (selState != Checkerboard.EMPTY && turn == (selState % 2 == 1) && board.hasMove(selSquare)) {
                 selected = selSquare;
             } else if (selected != -1) {
                 int fromSquare = selected;
@@ -87,7 +86,7 @@ class CheckersWorld extends World {
                     jumped = true;
 
                     selState = board.getState(selected);
-                    if (selState == fromState + 2 || !board.hasJump(selected)) {
+                    if (selState != fromState || !board.hasJump(selected)) {
                         turn = !turn;
                         selected = -1;
                         jumped = false;
@@ -133,11 +132,11 @@ class CheckersWorld extends World {
             return true;
         }
 
-        if (turn && !board.whiteHasMove()) {
+        if (turn && !board.hasMove(true)) {
             winner = false;
             return true;
         }
-        if (!turn && !board.blackHasMove()) {
+        if (!turn && !board.hasMove(false)) {
             winner = true;
             return true;
         }
